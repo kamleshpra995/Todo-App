@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const TodoForm = ({ todos, setTodos }) => {
+const TodoForm = ({ todos, setTodos, listId }) => {
   const initialState = {
     id: '',
     message: ''
@@ -19,9 +19,14 @@ const TodoForm = ({ todos, setTodos }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    setTodos([todo, ...todos]);
+    const newTodo = {
+      ...todo,
+      list_id: listId
+    };
 
-    axios.post(`http://localhost:8888/todos`, todo)
+    setTodos([newTodo, ...todos]);
+
+    axios.post(`http://localhost:8888/todos`, newTodo)
       .then(res => {
         console.log(res);
       }).catch(err => {

@@ -100,4 +100,66 @@ server.delete('/todos/:id', async (req,res)=>{
 
 
 
+// Lists endpoints
+server.get('/lists', async (req, res) => {
+  try {
+    const lists = await db('lists');
+    res.json(lists);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error fetching lists" });
+  }
+});
+
+server.post('/lists', async (req, res) => {
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({ message: "List name is required" });
+  }
+  try {
+    const [id] = await db('lists').insert({ name });
+    res.status(201).json({ id, name });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error creating list" });
+  }
+});
+
+// Update todos endpoint to handle list_id
+server.post('/todos', async (req, res) => {
+  const { message, list_id } = req.body;
+  if (!message) {
+    return res.status(400).json({ message: "You must have a message body" });
+  }
+  if (!list_id) {
+    return res.status(400).json({ message: "List ID is required" });
+  }
+  try {
+    await db('todos').insert({
+      message,
+      status: false,
+      completedOn: null,
+      list_id
+    });
+    res.status(200).json({ message: "Todo stored successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Error creating todo" });
+  }
+});
+
+// Get todos by list
+server.get('/lists/:listId/todos', async (req, res) => {
+  const { listId } = req.params;
+  try {
+    const todos = await db('todos')
+      .where('list_id', '=', listId)
+      .orderBy('id', 'desc');
+    res.json(todos);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error fetching todos" });
+  }
+});
+
 module.exports = server;

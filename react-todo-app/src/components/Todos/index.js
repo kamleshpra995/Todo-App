@@ -17,79 +17,56 @@ import axios from 'axios'
 
 
 
-const Todos = () => {
-    const [todoList, setTodoList] = useState([])
+const Todos = ({ listId }) => {
+  const [todoList, setTodoList] = useState([]);
 
-
-
-    useEffect(()=>{
-      axios.get('http://localhost:8888/todos', {})
-      .then(res=> {
+  const fetchTodos = () => {
+    if (listId) {
+      axios.get(`http://localhost:8888/lists/${listId}/todos`)
+        .then(res => {
           setTodoList(res.data);
-      })
-      .catch(err =>{
-        console.log(err)
-      })
-  
-  
-  
-  },[])
-  
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+  };
 
+  useEffect(() => {
+    fetchTodos();
+  }, [listId]);
 
-    const deleteHandler = (id)=>{
-
-      
-
-    axios.delete(`http://localhost:8888/todos/${id}`).then(res=>{
-      console.log(res)
-const newTodos = todoList.filter(item=>{
-        return item.id !==id
-      })
-      setTodoList(newTodos)
-
-
-    }).catch(err=>{
+  const deleteHandler = (id) => {
+    axios.delete(`http://localhost:8888/todos/${id}`).then(res => {
+      console.log(res);
+      const newTodos = todoList.filter(item => {
+        return item.id !== id;
+      });
+      setTodoList(newTodos);
+    }).catch(err => {
       console.log(err);
     });
-  
+  };
 
-
-
-    }
-
-
-    const updateHandler = (todo) =>{
-
-      
-
-
-      axios.put(`http://localhost:8888/todos/${todo.id}`,todo).then(res=>{
-        console.log(res)
-        setTodoList(prevTodos => 
-          prevTodos.map(item => 
-            item.id === todo.id ? todo : item
-          )
-        );
-  
-      }).catch(err=>{
-        console.log(err);
-      });
-    
-
-
-
-    }
-
+  const updateHandler = (todo) => {
+    axios.put(`http://localhost:8888/todos/${todo.id}`, todo).then(res => {
+      console.log(res);
+      setTodoList(prevTodos => 
+        prevTodos.map(item => 
+          item.id === todo.id ? todo : item
+        )
+      );
+    }).catch(err => {
+      console.log(err);
+    });
+  };
 
   return (
     <div style={{width: "80%"}}>
-    
-    <TodoForm todos={todoList}  setTodos={setTodoList} />
-    <TodoList todos = {todoList} deleteHandler={deleteHandler} updateHandler= {updateHandler} />
-
+      <TodoForm todos={todoList} setTodos={setTodoList} listId={listId} />
+      <TodoList todos={todoList} deleteHandler={deleteHandler} updateHandler={updateHandler} />
     </div>
-  )
-}
+  );
+};
 
-export default Todos
+export default Todos;
