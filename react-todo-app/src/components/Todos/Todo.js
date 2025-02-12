@@ -44,7 +44,7 @@ const Todo = ({ todo, deleteHandler, updateHandler }) => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%',
+    width: '90%',
     border: '1px solid #ddd',
     borderRadius: '5px',
     padding: '10px',

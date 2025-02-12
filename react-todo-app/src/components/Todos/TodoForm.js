@@ -3,34 +3,38 @@ import axios from 'axios';
 
 const TodoForm = ({ todos, setTodos, listId }) => {
   const initialState = {
-    id: '',
-    message: ''
+    message: '',
+    list_id: listId
   };
 
   const [todo, setTodo] = useState(initialState);
 
   const handleChange = (e) => {
     setTodo({
-      message: e.target.value,
-      id: Date.now()
+      ...todo,
+      message: e.target.value
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (todo.message.trim().length < 10) return;
 
     const newTodo = {
       ...todo,
-      list_id: listId
+      id: Date.now(),
+      status: false,
+      completedOn: null
     };
 
     setTodos([newTodo, ...todos]);
 
-    axios.post(`http://localhost:8888/todos`, newTodo)
+    axios.post(`http://localhost:8888/todos`, todo)
       .then(res => {
         console.log(res);
       }).catch(err => {
         console.log(err);
+        setTodos(todos);
       });
 
     setTodo(initialState);
@@ -78,11 +82,21 @@ const TodoForm = ({ todos, setTodos, listId }) => {
         type='text'
         name='todo'
         value={todo.message}
-        placeholder='Enter your todo'
+        placeholder='Enter your todo (min. 10 characters)'
         onChange={handleChange}
         style={inputStyle}
       />
-      <button type='submit' style={buttonStyle}>Add Todo</button>
+      <button 
+        type='submit' 
+        style={{
+          ...buttonStyle,
+          opacity: todo.message.trim().length >= 10 ? 1 : 0.5,
+          cursor: todo.message.trim().length >= 10 ? 'pointer' : 'not-allowed'
+        }}
+        disabled={todo.message.trim().length < 10}
+      >
+        Add Todo
+      </button>
     </form>
   );
 };
