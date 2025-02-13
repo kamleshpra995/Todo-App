@@ -43,27 +43,6 @@ server.get('/todos/:id', async (req,res)=>{
     
     })
 
-server.put('/todos/:id', async (req,res)=>{
-        const {id} = req.params
-        const {message, status, completedOn} = req.body
-        if(!message){
-            return res.status(400).json({message : "you must have a message body"})
-        }
-
-        try {
-            await db('todos').where({id}).update({
-                message,
-                status: status !== undefined ? status : false,
-                completedOn: completedOn || null
-            })
-            res.status(200).send({message: "successfully updated"})
-        } catch (error) {
-            console.log(error)
-            res.status(500).send({ message: "Error updating todo" })
-        }
-
-
-})
 server.delete('/todos/:id', async (req,res)=>{
     const {id} = req.params
    
@@ -117,16 +96,20 @@ server.get('/lists/:listId/todos', async (req, res) => {
   }
 });
 
+// Update the POST route
 server.post('/todos', async (req, res) => {
-  const { message, list_id } = req.body;
+  const { title, details, priority, dueDate, list_id } = req.body;
   
-  if (!message) {
-    return res.status(400).json({ message: "you must have a message body" });
+  if (!title) {
+    return res.status(400).json({ message: "Title is required" });
   }
 
   try {
     const [id] = await db('todos').insert({
-      message,
+      title,
+      details,
+      priority,
+      dueDate,
       list_id,
       status: false,
       completedOn: null
@@ -137,6 +120,30 @@ server.post('/todos', async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error creating todo" });
+  }
+});
+
+// Update the PUT route
+server.put('/todos/:id', async (req,res)=>{
+  const {id} = req.params
+  const {title, details, priority, dueDate, status, completedOn} = req.body
+  if(!title){
+      return res.status(400).json({message : "Title is required"})
+  }
+
+  try {
+      await db('todos').where({id}).update({
+          title,
+          details,
+          priority,
+          dueDate,
+          status: status !== undefined ? status : false,
+          completedOn: completedOn || null
+      })
+      res.status(200).send({message: "successfully updated"})
+  } catch (error) {
+      console.log(error)
+      res.status(500).send({ message: "Error updating todo" })
   }
 });
 
